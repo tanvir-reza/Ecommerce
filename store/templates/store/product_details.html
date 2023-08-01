@@ -100,13 +100,14 @@
 
 
 <script>
+    
         $(document).on('click','#add-button',function(e){
 
             e.preventDefault();
-            
             $.ajax({
-                type: "POST",
+                method: "POST",
                 url : '{% url "cart-add" %}',
+                
 
                 data:{
                     product_id: $('#add-button').val(),
@@ -121,7 +122,7 @@
                 },
 
                 error:function(xhr,errmsg,err){
-                    console.log(xhr)
+                    
 
                 }
             })
