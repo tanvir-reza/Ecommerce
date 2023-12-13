@@ -29,9 +29,10 @@ SECRET_KEY = 'django-insecure-sux$uz-zzqc@1fzk^=3x0akxs87%zr)$5x54^p&xy5kw#xevs9
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+
+
 ALLOWED_HOSTS = ['*']
 
-SITE_ID = 2
 
 
 # Application definition
@@ -47,23 +48,9 @@ INSTALLED_APPS = [
     'cart',
     'store',
     'users',
-    'django.contrib.sites',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.google',
 ]
-SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        'SCOPE': [
-            'profile',
-            'email',
-        ],
-        'AUTH_PARAMS': {
-            'access_type': 'online',
-        }
-    }
-}
+
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -74,7 +61,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    "allauth.account.middleware.AccountMiddleware"
 ]
 
 ROOT_URLCONF = 'ecommerce.urls'
@@ -91,7 +77,8 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'cart.context_processors.cartCount',
-                'store.views.categorys'
+                'store.views.categorys',
+                
             ],
         },
     },
@@ -164,15 +151,10 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# SESSION_COOKIE_AGE = 86400
+SESSION_COOKIE_AGE = 86400
+SESSION_COOKIE_DOMAIN = ''
+
 # CART_ID = 'cart'
 
-AUTHENTICATION_BACKENDS = (
-    "django.contrib.auth.backends.ModelBackend",
-    "allauth.account.auth_backends.AuthenticationBackend",
-)
 
-
-LOGIN_REDIRECT_URL = '/'
-ACCOUNT_LOGOUT_REDIRECT_URL = '/'
 

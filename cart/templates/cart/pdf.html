@@ -2,7 +2,10 @@
 <html lang="en">
 {% load static %}
 <head>
-  <title>Invoice WonderShop</title>
+  <title>Invoice MYShop</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+
 <style>
   .clearfix:after {
   content: "";
@@ -44,7 +47,6 @@ h1 {
   font-size: 2.4em;
   line-height: 1.4em;
   font-weight: normal;
-  text-align: center;
   margin: 0 0 20px 0;
 }
 
@@ -140,30 +142,27 @@ footer {
   text-align: center;
 }
 
-
   </style>
 </head>
 
 <body>
   <header class="clearfix">
     <div id="logo" style="display:flex; justify-content:center; align-items:center;">
-      {#<img src="static/firstapp/images/logo.png" class="brand-logo" width=60 height=60>#} <!--not working-->
-      {#<img src="static/logo.png" class="brand-logo" height="200px">#} <!--not working-->
-      <img src="D:\Mastering Django\firstproject\firstapp\logo.png" class="brand-logo" width=60 height=60>
-      <h1 class="brand-name">WonderShop</h1>
+      <h1 class="brand-name">MYShop</h1>
+      <img src="{% static 'img/logo.png' %}" alt="logo" >
     </div>
-    <h1>INVOICE</h1>
+    <h4 style="text-align: center;">INVOICE</h4>
     <div id="company" class="clearfix">
-      <div>WonderShop</div>
-      <div><a href="mailto:company@example.com">company@example.com</a></div>
-      <div><a href="www.wondershop.in:8000">www.wondershop.in:8000</a></div>
+      <div>MYShop</div>
+      <div><a href="mailto:mail@myshop.com">mail@myshop.com</a></div>
+      <div><a href="www.myshop.com">www.myshop.com</a></div>
     </div>
     <div id="project">
       <div><span>CLIENT:</span> {{name}}</div>
-      <div><span>EMAIL:</span> <a href="mailto:{{user_email}}">{{user_email}}</a></div>
-      <div><span>DATE:</span> {{date}}</div>
+      <div><span>Phone:</span> {{phone}}</div>
+      <div><span>DATE:</span> {{time}}</div>
       <div><span>INVOICE ID:</span> {{order_id}}</div>
-      <div><span>TRANSACTION ID:</span> {{transaction_id}}</div>
+      <div><span>TRANSACTION ID:</span> {{tran_id}}</div>
     </div>
     <br>
     <br>
@@ -178,25 +177,43 @@ footer {
               </tr>
           </thead>
           <tbody>
-              {% for i in order.productinorder_set.all %}
+              {% for i in cart_items %}
               <tr>
-                  <td scope="row">{{i.product}}</td>
+                  <td scope="row">{{i.product.name}}</td>
                   <td>{{i.quantity}}</td>
-                  <td>{{i.price}}</td>
+                  <td>{{i.product.price}}</td>
                   
               </tr>
               {% endfor %}
               <tr>
                   <td scope="row"></td>
                   <td>TOTAL: </td>
-                  <td>{{amount}}</td>
+                  <td>{{total_price}}</td>
                   
               </tr>
           </tbody>
       </table>
 
+      <div class="row">
+        <div class="col-md-6 col-6">
+          <h4 style="color:red">Shipping Address</h4>
+          <p>{{shipping_address}}</p>
+        </div>
+        <div class="col-md-6 col-6">
+          <h4 style="color:red">Payment Details</h4>
+          <p>Payment Method: {{payment}}</p>
+          <p>Payment Status: Paid</p>
+          <p>Total Paid: {{total_price}}</p>
+
+        </div>
+
+      </div>
+
+      
+      
+
     </div>
-    <p style="text-align:right; font-size:12px;">*All values are in INR<p>
+    <p style="text-align:right; font-size:12px;">*All values are in BDT<p>
 </body>
 
 </html>

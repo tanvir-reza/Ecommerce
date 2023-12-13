@@ -1,4 +1,5 @@
 
+
 def cartCount(request):
     cart = request.session.get('cart')
     
@@ -6,3 +7,4 @@ def cartCount(request):
         return {'cart_count': len(cart)}
     else:
         return {'cart_count': 0}
+    
