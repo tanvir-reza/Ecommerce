@@ -1,4 +1,4 @@
-{% include "store/base.html" %}
+{% extends "store/base.html" %}
 
 
 {% load static %}
@@ -11,7 +11,14 @@
     
     <div class="container">
       
-      <h1 class="h5"> Shopping cart </h1>
+     {% if length > 0 %}
+      <h1 class="h5 ms-auto"> Shopping cart </h1>
+
+      <div class="text-end ml-auto">
+ 
+        <div class="h6 fw-bold"> Sub total: $ {{product_price}}<div id="total" class="d-inline-flex"> <!-- cart.get_total --> </div></div>
+ 
+      </div>
 
 	<hr>
       
@@ -25,12 +32,12 @@
         
         <div class="col-md-3 col-lg-2 order-md-first bg-light">
         
-            <img class="img-fluid mx-auto d-block" width="200px" alt="Responsive image" src="{{item.product.image.url}}"> <!-- Product image -->
+            <img class="img-fluid mx-auto d-block w-50"  alt="Responsive image" src="{{item.product.image.url}}"> <!-- Product image -->
         
         </div>
 
         
-        <div class="col-md-9 col-lg-10 ps-md-3 ps-lg-10">
+        <div class="col-md-9 col-lg-10 ">
           
           <a href="" class="text-decoration-none text-reset"> <!-- Product get absolute url -->
           
@@ -69,12 +76,12 @@
             
                   
                   &nbsp;
+                   
 
-                  <button type="button" id="delete-button"
+                  <a a="button" href="#" data-product-id="{{ item.product.id }}" 
                     class="btn btn-danger btn-sm delete-button">
                     Delete
-        
-                  </button>
+                </a>
         
 
                 </div>
@@ -90,18 +97,49 @@
     </div>
       
 {% endfor %}
+    {% else %}
+    <div class="text-center mb-5">
+            <h2 class="my-4">Your Cart is Empty</h2>
+            <a href="{% url 'home' %}" class="btn btn-primary">Continue Shopping</a>
+    </div>
+     {% endif %}
 
-      <div class="col-12 text-end">
- 
-        <div class="h6 fw-bold"> Sub total: $ {{product_price}}<div id="total" class="d-inline-flex"> <!-- cart.get_total --> </div></div>
- 
-      </div>
- 
 
     </div>
   
 
- </main>
+ </main class="mb-5">
+
+
+ <script type="text/javascript">
+  $(document).ready(function() {
+        $('.delete-button').click(function(e) {
+            e.preventDefault()
+             var prod_id = $(this).data('product-id');
+
+
+            
+            $.ajax({
+                type:'POST',
+                url:'{% url "delete_cart" %}',
+                data:{
+                    prod_id: prod_id,
+                },
+                success:function(data){
+                   var cart = JSON.parse(data.length)
+                   document.getElementById("cart-qnt").innerHTML = cart
+                   location.reload(); // Add this line to reload the page
+                }
+                
+                
+            })
+           
+        
+        })
+    })
+    </script>
+
+
 
 
 

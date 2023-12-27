@@ -17,12 +17,13 @@ from users.models import Profile
 from django.contrib.auth.models import User
 from django.contrib.auth import login
 from django.contrib import messages
+from django.views.decorators.csrf import csrf_exempt
+from .helpers import sendMessage
 
 
 
 def cart_add(request):
     if request.method == 'POST':
-        
         product_id = request.POST.get('prod_id')
         qunatity = int(request.POST.get('qty'))
         cart = request.session.get('cart', {})
@@ -33,6 +34,18 @@ def cart_add(request):
         request.session['cart'] = cart
         length = len(cart)
         print(cart)
+        return JsonResponse({'length':length})
+    
+@csrf_exempt
+def cart_del(request):
+    if request.POST:
+        product_id = request.POST.get('prod_id')
+        print(product_id)
+        cart = request.session.get('cart', {})
+        if product_id in cart:
+            del cart[product_id]
+        request.session['cart'] = cart
+        length = len(cart)
         return JsonResponse({'length':length})
         
 
@@ -47,21 +60,17 @@ def cart_summery(request):
         cart_items.append({'product': product, 'quantity': quantity})
     length = len(cart_items)
     print(product_price)
-    return render(request, 'cart/cart-summary.html', {'cart_items': cart_items,'product_price':product_price})
+    return render(request, 'cart/cart-summary.html', {'cart_items': cart_items,'product_price':product_price,'length':length})
 
 @login_required(login_url='login')
 def checkout(request):
     user = Profile.objects.filter(user=request.user).first()
-    
     if user is not None:
         print("ami")
         if user.name == "":
             messages.error(request, 'Please Update Your Profile')
             return redirect('update_profile')
         if user.phone == "":
-            messages.error(request, 'Please Update Your Profile')
-            return redirect('update_profile')
-        if user.Shipping_address == "":
             messages.error(request, 'Please Update Your Profile')
             return redirect('update_profile')
     cart = request.session.get('cart', {})
@@ -81,16 +90,14 @@ def payment(request):
     user = Profile.objects.filter(user=request.user).first()
     
     if user is not None:
-        print("ami")
         if user.name == "":
             messages.error(request, 'Please Update Your Profile')
             return redirect('update_profile')
         if user.phone == "":
             messages.error(request, 'Please Update Your Profile')
             return redirect('update_profile')
-        if user.Shipping_address == "":
-            messages.error(request, 'Please Update Your Profile')
-            return redirect('update_profile')
+        
+    
     if request.method == 'POST':
         status = 'http://127.0.0.1:8000/cart/payment-status/'
         if request.POST.get('payment') == 'ssl':
@@ -106,11 +113,13 @@ def payment(request):
                 total_ammount += product.price * quantity
                 cart_items.append({'product': product, 'quantity': quantity})
             len(cart_items)
+
+            del request.session['cart']
             
             profile = Profile.objects.get(user=user)
             name = profile.name
             phone = profile.phone
-            shipping_address = profile.Shipping_address
+            shipping_address = request.POST.get('shipping_address').strip()
             
             
             invoice =  download_pdf(order_id,name,phone,shipping_address,tran_id,payment_type,total_ammount,cart_items)
@@ -160,7 +169,54 @@ def payment(request):
             post_body['product_profile'] = "general"
 
             response = sslcz.createSession(post_body) # API response
+            print(response)
+            
             return redirect(response['GatewayPageURL'])
+        
+        if request.POST.get('payment') == 'cash':
+            order_id = generate_unique_id()
+            user = request.user
+            tran_id = '00'
+            payment_type = 'CASH ON DELIVERY'
+            cart = request.session.get('cart', {})
+            total_ammount = 0
+            cart_items = []
+            for product_id, quantity in cart.items():
+                product = Product.objects.get(id=product_id)
+                total_ammount += product.price * quantity
+                cart_items.append({'product': product, 'quantity': quantity})
+            len(cart_items)
+            
+            profile = Profile.objects.get(user=user)
+            name = profile.name
+            phone = profile.phone
+            shipping_address = profile.address
+            
+            
+            invoice =  download_pdf(order_id,name,phone,shipping_address,tran_id,payment_type,total_ammount,cart_items)
+
+            order = Order.objects.create(
+                order_id=order_id,
+                user=user,
+                shipping_address=shipping_address,
+                tnx_id=tran_id, 
+                payment_status=True,
+                payment_type=payment_type,
+                invoice=invoice,
+                total_amount=total_ammount,
+            )
+            for item in cart_items:
+                OrderItem.objects.create(
+                    product=item['product'],
+                    order=order,
+                    quantity=item['quantity'],
+                )
+            order.save()
+            del request.session['cart']
+            messages.error(request, 'Order Confirmed')
+            sendMessage(name,phone,order_id,total_ammount,payment_type)
+            return redirect('profile')
+
         
     return redirect('checkout')
 
@@ -168,10 +224,24 @@ def payment(request):
 def payment_status(request):
     if request.method == 'POST':
         payment_data = request.POST
+        print(payment_data)
         if payment_data['status'] == 'VALID':
-            request.session['val_id'] = payment_data['val_id']
-            request.session['tran_id'] = payment_data['tran_id']
-            return redirect('payment_success')
+            tran_id = payment_data['tran_id']
+            val_id = payment_data['val_id']
+
+            Order.objects.filter(tnx_id=tran_id).update(payment_status=True,val_id=val_id)
+            messages.error(request, 'Order Confirmed')
+            orderrid = Order.objects.filter(tnx_id=tran_id).first()
+            order_id = orderrid.order_id
+            total = orderrid.total_amount
+            payment_type = payment_data['card_issuer']
+            user = orderrid.user
+            profile = Profile.objects.get(user=user)
+            name = profile.name
+            phone = profile.phone
+            sendMessage(name,phone,order_id,total,payment_type)
+            
+            return redirect('profile')
         else:
             return redirect('payment_fail')
         
@@ -179,15 +249,15 @@ def payment_status(request):
     
 
 def payment_success(request):
-    tran_id = request.session.get('tran_id')
-    val_id = request.session.get('val_id')
-    Order.objects.filter(tnx_id=tran_id).update(payment_status=True,val_id=val_id)
-    return HttpResponse("Payment Success !!!")
+    
+    pass
 
     
 
 def payment_fail(request):
     return HttpResponse("Payment Fail !!!")
+
+
     
 
 # PDF GENERATOR

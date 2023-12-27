@@ -47,10 +47,11 @@
 
                     <div class="col">
               
-                        <div class="row p-3">
+                        
               
                             
                             <form id="post-form">
+                            <div class="row p-3">
                                 {% csrf_token %}  
                             <div class="col-6">
               
@@ -72,20 +73,21 @@
                                 </select>
                                 <input type="hidden" id="prod_id" value="{{product.id}}" name="prod_id">
                                 
-                                <button type="submit" class="btn btn-secondary btn-sm">
+                                 
+
+                            </div>
+                            <button type="submit" class="btn btn-secondary btn-sm">
                         
                                 Add to cart 
                             
                                 </button> 
-
-                            </div> 
                             
-                            
+                            </div>
                             </form>
                             
                                 
                         
-                        </div>
+                        
 
                     </div>
 

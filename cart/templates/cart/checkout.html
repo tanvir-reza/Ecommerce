@@ -1,4 +1,4 @@
-{% include "store/base.html" %}
+{% extends "store/base.html" %}
 
 
 {% load static %}
@@ -6,8 +6,10 @@
 
 {% block body %}
 
+<main class="pt-5">
 <div class="container">
-    <div class="row">
+    {% if cart_count > 0  %}
+    <div class="row mb-5">
         <div class="col-md-6">
             <h2 class="my-4">Your Order</h2>
             <table class="table">
@@ -39,12 +41,15 @@
                 <div class="card-body">
                     <p>Name : <strong>{{user.profile.name}}</strong></p>
                     <p>Phone Number : {{user.profile.phone}}</p>
-                    <p>Address : {{user.profile.shipping_address}}</p>
                 </div>
             </div>
-            <form method="post" action='{% url "payment" %} '>
+            <form id="post-form" method="post" action='{% url "payment" %} '>
                 {% csrf_token %}
-
+                {% comment %} shipping address {% endcomment %}
+                <div class="form-group">
+                    <label for="shipping_address">Shipping Address</label>
+                    <textarea class="form-control" id="shipping_address"  name="shipping_address" rows='7'></textarea>
+                </div>
                 <!-- select payment method -->
                 <div class="form-group">
                     <label for="payment">Payment Method</label>
@@ -54,12 +59,38 @@
                         <option value="ssl">SSL-COMMERZ</option>
                     </select>
                 </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
+                <button id="sumit" type="submit" class="btn btn-primary">Submit</button>
             </form>
         </div>
     </div>
+    {% else %}
+        <div class="text-center mb-5">
+            <h2 class="my-4">Your Cart is Empty</h2>
+            <a href="{% url 'home' %}" class="btn btn-primary">Continue Shopping</a>
+        </div>
+    {% endif %}
 </div>
+</main>
 
 
-{% endblock %}
+<script>
+    var s_address = document.getElementById("shipping_address");
+    var payment = document.getElementById("payment");
+    var form = document.getElementById("post-form");
+
+        form.addEventListener("submit", function(event) {
+            if (s_address.value == "") {
+                alert("Shipping address must be filled out");
+                event.preventDefault();
+            }
+            if (payment.value == "Select payment method") {
+                alert("Select payment method");
+                event.preventDefault();
+            }
+        });
+
+</script>
+
+
+{% endblock body %}
 

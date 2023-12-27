@@ -2,6 +2,7 @@
 from .models import Order
 from store.models import Product
 import random, string
+import requests
 
 def generate_unique_id():
     length = 5
@@ -29,3 +30,13 @@ def cart(request):
         product_price += product.price * quantity
         cart_items.append({'product': product, 'quantity': quantity})
     return {'cart_items': cart_items,'product_price':product_price}
+
+
+
+def sendMessage(name,phone,order_id,total_ammount,payment_type):
+    api = 'dTUsZl0CvtmvDF35kQY1'
+    rec = phone
+    msg = f"Dear {name}, \nYour Order ID: {order_id} and Total Ammount: {total_ammount} payment by {payment_type} \nOrder Confirmed. \nThank You For Shopping With Us."
+    response = requests.post('http://bulksmsbd.net/api/smsapi?api_key='+api+'&type=text&number='+rec+'&senderid=8809617611061&message='+msg+'').json()
+    print(response)
+    return True

@@ -8,13 +8,14 @@ from django.http import JsonResponse
 # Create your views here.
 def index(request):
     products = Product.objects.all()
-    cart = request.session.get('cart', {})
-    user = request.user
-    if user.is_authenticated:
-        print(user)
-
+    shoes = Category.objects.get(slug='shoes')
+    shirt = Category.objects.get(slug='shirt')
+    hudi = Category.objects.get(slug='hudi')
     context = {
-        'products': products
+        'products': products,
+        'shoes': shoes,
+        'shirt': shirt,
+        'hudi': hudi,
     }
     return render(request, 'store/store.html', context)
 
@@ -40,3 +41,7 @@ def categoryProducts(request, slug):
 def categorys(request):
     all_category = Category.objects.all()
     return {'all_category': all_category}
+
+
+def custom_404(request, exception):
+    return render(request, 'store/404.html',{}, status=404)

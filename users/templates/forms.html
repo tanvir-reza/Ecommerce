@@ -1,4 +1,4 @@
-{% include "store/base.html" %}
+{% extends "store/base.html" %}
 
 {% load static %}
 
@@ -19,11 +19,11 @@
     {% endif %}
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <form method="POST" id="post-form" action="{% url "update_profile" %}">
+            <form method="POST" enctype="multipart/form-data" id="post-form" action="{% url "update_profile" %}">
                 {% csrf_token %}
                 {{form.as_p}}
                 
-                <button type="submit" class="btn btn-primary justify-content-center">Sign Up</button>
+                <button type="submit" class="btn btn-primary ">Submit</button>
 
                 
             </form>
@@ -32,6 +32,26 @@
 
 
 </div>
+
+<script>
+    var phone = document.getElementById("id_phone");
+    var form = document.getElementById("post-form");
+    phone.addEventListener("keydown", function(event) {
+            if (this.value.length === 1 && this.value[0] !== '0') {
+                alert("Phone number should start with 0");
+                this.value = "";
+            }
+         });
+
+        form.addEventListener("submit", function(event) {
+            var phoneRegex = /^0\d{10}$/;
+            if (!phoneRegex.test(phone.value)) {
+                alert("Invalid phone number. It should be exactly 11 digits long.");
+                event.preventDefault(); // prevent form submission
+            }
+        });
+
+</script>
 
 
 {% endblock %}

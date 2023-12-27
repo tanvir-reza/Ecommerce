@@ -6,6 +6,8 @@ from django.db.models import Q
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .forms import ProfileForm
+from cart.models import Order
+from django.db.models import Sum
 # Create your views here.
 def signup_view(request):
     if request.method == 'POST':
@@ -13,6 +15,11 @@ def signup_view(request):
         username = request.POST['username']
         email = request.POST['email']
         password = request.POST['password']
+        username = username.lower()
+        email = email.lower()
+        username = username.strip()
+        email = email.strip()
+        username = username.replace(" ", "")
         if len(username) < 4:
             messages.error(request, 'Username must be 4 character long')
             return redirect('signup')
@@ -55,7 +62,7 @@ def login_view(request):
 def update_profile(request):
     form = ProfileForm(instance=request.user.profile)
     if request.method == 'POST':
-        form = ProfileForm(request.POST,instance=request.user.profile)
+        form = ProfileForm(request.POST,instance=request.user.profile, files=request.FILES)
         if form.is_valid():
             form.save()
             messages.success(request, 'Profile Updated Successfully')
@@ -100,11 +107,31 @@ def profile(request):
         if user.phone == "":
             messages.error(request, 'Please Update Your Profile')
             return redirect('update_profile')
-        if user.Shipping_address == "":
+        if user.address == "":
             messages.error(request, 'Please Update Your Profile')
             return redirect('update_profile')
 
     return render(request, 'profile.html')
+
+
+@login_required(login_url='login')
+def ordersView(request):
+    oders = Order.objects.filter(user=request.user).order_by('-created_at')
+    total_orders = oders.count()
+    print(f'Total:{total_orders}')
+    total_delivered = oders.filter(payment_status=False).count()
+    print(f'Delivered:{total_delivered}')
+    total_pending = oders.filter(payment_status=False).count()
+    total_spend = Order.objects.filter(user=request.user).aggregate(Sum('total_amount'))
+    context = {
+        'orders':oders,
+        'total_orders':total_orders,
+        'total_delivered':total_delivered,
+        'total_pending':total_pending,
+        'total_spend':total_spend,
+
+    }
+    return render(request, 'orders.html',context)
 
 @login_required(login_url='login')
 def logout_view(request):

@@ -8,7 +8,8 @@ class Profile(models.Model):
     email = models.EmailField(max_length=255, blank=False, null=True)
     name = models.CharField(max_length=255, blank=False, null=False,default='')
     phone = models.CharField(max_length=20, blank=False, null=False,default='')
-    Shipping_address = models.CharField(max_length=255, blank=False, default='Dhaka')
+    address = models.CharField(max_length=255, blank=False, default='Dhaka')
+    image = models.ImageField(upload_to='profile', blank=False, null=True,default='profile/avatar.png')
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     update_at = models.DateTimeField(auto_now=True)
 
