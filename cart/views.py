@@ -99,7 +99,7 @@ def payment(request):
         
     
     if request.method == 'POST':
-        status = 'http://204.152.197.187/cart/payment-status/'
+        status = 'http://narsten.com/cart/payment-status/'
         if request.POST.get('payment') == 'ssl':
             order_id = generate_unique_id()
             user = request.user
