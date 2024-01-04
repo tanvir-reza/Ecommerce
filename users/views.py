@@ -119,7 +119,7 @@ def ordersView(request):
     oders = Order.objects.filter(user=request.user).order_by('-created_at')
     total_orders = oders.count()
     print(f'Total:{total_orders}')
-    total_delivered = oders.filter(payment_status=False).count()
+    total_delivered = oders.filter(payment_status=True).count()
     print(f'Delivered:{total_delivered}')
     total_pending = oders.filter(payment_status=False).count()
     total_spend = Order.objects.filter(user=request.user).aggregate(Sum('total_amount'))

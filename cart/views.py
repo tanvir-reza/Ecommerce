@@ -99,7 +99,7 @@ def payment(request):
         
     
     if request.method == 'POST':
-        status = 'http://narsten.com/cart/payment-status/'
+        status = 'https://narsten.com/cart/payment-status/'
         if request.POST.get('payment') == 'ssl':
             order_id = generate_unique_id()
             user = request.user
@@ -230,7 +230,6 @@ def payment_status(request):
             val_id = payment_data['val_id']
 
             Order.objects.filter(tnx_id=tran_id).update(payment_status=True,val_id=val_id)
-            messages.error(request, 'Order Confirmed')
             orderrid = Order.objects.filter(tnx_id=tran_id).first()
             order_id = orderrid.order_id
             total = orderrid.total_amount
@@ -240,7 +239,7 @@ def payment_status(request):
             name = profile.name
             phone = profile.phone
             sendMessage(name,phone,order_id,total,payment_type)
-            
+            messages.error(request, 'Order Confirmed')
             return redirect('profile')
         else:
             return redirect('payment_fail')
@@ -255,7 +254,8 @@ def payment_success(request):
     
 
 def payment_fail(request):
-    return HttpResponse("Payment Fail !!!")
+    messages.error(request, 'Payment Failed')
+    return redirect('profile')
 
 
     
